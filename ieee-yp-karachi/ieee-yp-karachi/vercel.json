@@ -1,0 +1,36 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/about",                                         "destination": "/about.html" },
+    { "source": "/committee",                                     "destination": "/committee.html" },
+    { "source": "/events",                                        "destination": "/events.html" },
+    { "source": "/membership",                                    "destination": "/membership.html" },
+    { "source": "/resources",                                     "destination": "/resources.html" },
+    { "source": "/admin",                                         "destination": "/admin.html" },
+    { "source": "/events/career-catalyst",                        "destination": "/events/career-catalyst/index.html" },
+    { "source": "/events/career-catalyst/speaker-profile",        "destination": "/events/career-catalyst/speaker-profile.html" },
+    { "source": "/events/career-catalyst/business-communication", "destination": "/events/career-catalyst/business-communication.html" },
+    { "source": "/events/career-catalyst/critical-thinking",      "destination": "/events/career-catalyst/critical-thinking.html" },
+    { "source": "/events/career-catalyst/teamwork",               "destination": "/events/career-catalyst/teamwork.html" },
+    { "source": "/events/career-catalyst/professional-networking","destination": "/events/career-catalyst/professional-networking.html" },
+    { "source": "/events/career-catalyst/professional-ethics",    "destination": "/events/career-catalyst/professional-ethics.html" },
+    { "source": "/events/career-catalyst/decision-making",        "destination": "/events/career-catalyst/decision-making.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options",        "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",       "value": "1; mode=block" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}

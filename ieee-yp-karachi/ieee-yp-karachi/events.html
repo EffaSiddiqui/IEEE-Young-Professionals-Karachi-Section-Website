@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Events — IEEE Young Professionals Karachi Section</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .page-hero{background:var(--bg-dark);padding:64px 0;position:relative;overflow:hidden;}
+    .page-hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+    .page-hero-inner{position:relative;z-index:1;}
+    .breadcrumb{font-size:0.75rem;color:rgba(255,255,255,.4);margin-bottom:12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .breadcrumb a{color:rgba(255,255,255,.4);}
+    .breadcrumb a:hover{color:var(--accent);}
+    .page-hero h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;color:#fff;margin-bottom:12px;}
+    .page-hero p{font-size:1rem;color:rgba(255,255,255,.6);max-width:580px;line-height:1.7;}
+    .filter-tab{padding:8px 18px;border-radius:var(--r-full);border:1.5px solid var(--border);background:#fff;color:var(--text-muted);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;}
+    .filter-tab:hover{border-color:var(--primary);color:var(--primary);}
+    .filter-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+    .search-bar{display:flex;gap:10px;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:var(--r-md);padding:10px 14px;}
+    .search-input{flex:1;min-width:140px;border:none;outline:none;font-size:0.88rem;color:var(--text);background:transparent;}
+
+    /* Series card — SL style */
+    .series-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;transition:all .22s;display:flex;flex-direction:column;}
+    .series-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px);}
+    .series-card-banner{height:140px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+    .series-card-body{padding:22px 24px;flex-grow:1;display:flex;flex-direction:column;}
+    .series-card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+    .series-card-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3;}
+    .series-card-desc{font-size:0.83rem;color:var(--text-muted);line-height:1.6;flex-grow:1;margin-bottom:14px;}
+    .series-card-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
+    .series-card-date{font-size:0.78rem;color:var(--text-muted);font-weight:600;}
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+    .modal-overlay.active{display:flex;}
+    .modal-box{background:#fff;border-radius:var(--r-xl);width:100%;max-width:560px;padding:36px 28px;position:relative;box-shadow:var(--shadow-xl);margin:auto;animation:modalIn .25s ease;}
+    @keyframes modalIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+    .modal-close{position:absolute;top:14px;right:16px;width:32px;height:32px;border-radius:var(--r-sm);background:var(--bg-off);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;color:var(--text-muted);transition:all .15s;}
+    .modal-close:hover{background:#FEE2E2;color:#DC2626;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+    .form-label{font-size:0.8rem;font-weight:600;color:var(--text);}
+    .form-input{padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:0.88rem;color:var(--text);background:#fff;transition:border-color .2s;width:100%;font-family:inherit;}
+    .form-input:focus{outline:none;border-color:var(--primary);}
+    .form-status{padding:11px 14px;border-radius:var(--r-sm);font-size:0.85rem;display:none;margin-bottom:14px;}
+    .form-status.success{display:block;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+    .form-status.error{display:block;background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;}
+    @media(max-width:768px){.form-row{grid-template-columns:1fr;}.modal-box{padding:24px 16px;}}
+  </style>
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<!-- Propose Modal -->
+<div class="modal-overlay" id="propose-modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close-btn">&times;</button>
+    <div style="font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:4px;">Propose an Activity</div>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">Submit your workshop, seminar, or networking event proposal. The IEEE YP Karachi Committee will review and respond within 3&ndash;5 business days.</p>
+    <div class="form-status" id="form-status"></div>
+    <form id="propose-form" novalidate>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name <span style="color:#DC2626">*</span></label><input class="form-input" type="text" name="name" placeholder="Your full name" required></div>
+        <div class="form-group"><label class="form-label">Email <span style="color:#DC2626">*</span></label><input class="form-input" type="email" name="email" placeholder="you@example.com" required></div>
+      </div>
+      <div class="form-group"><label class="form-label">Organization</label><input class="form-input" type="text" name="organization" placeholder="University or company name"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Event Type <span style="color:#DC2626">*</span></label>
+          <select class="form-input" name="eventType" required><option value="">Select...</option><option>Workshop</option><option>Seminar / Talk</option><option>Webinar</option><option>Networking Event</option><option>Conference</option><option>Industry Visit</option><option>Competition</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Proposed Date</label><input class="form-input" type="date" name="date"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Event Title <span style="color:#DC2626">*</span></label><input class="form-input" type="text" name="title" placeholder="Proposed event title" required></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Venue</label><input class="form-input" type="text" name="venue" placeholder="Location or Online"></div>
+        <div class="form-group"><label class="form-label">Target Audience</label><input class="form-input" type="text" name="audience" placeholder="e.g., Fresh graduates"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description <span style="color:#DC2626">*</span></label><textarea class="form-input" name="description" rows="4" placeholder="Describe your proposed event..." required style="resize:vertical;"></textarea></div>
+      <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;">Submit Proposal</button>
+    </form>
+  </div>
+</div>
+
+<section class="page-hero">
+  <div class="container page-hero-inner">
+    <div class="breadcrumb"><a href="/events/career-catalyst">Home</a> <span>/</span> Events</div>
+    <h1>Programs &amp; Events</h1>
+    <p>Stay updated with our latest workshops, webinars, and career development series designed for young professionals in Karachi.</p>
+  </div>
+</section>
+
+<!-- Filter bar -->
+<div style="border-bottom:1px solid var(--border);background:#fff;padding:14px 0;position:sticky;top:58px;z-index:90;">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="webinars">Webinars</button>
+      <button class="filter-tab" data-filter="workshops">Workshops</button>
+      <button class="filter-tab" data-filter="networking">Networking</button>
+      <button class="filter-tab" data-filter="visits">Industry Visits</button>
+    </div>
+    <div class="search-bar" style="max-width:260px;width:100%;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" type="text" id="event-search" placeholder="Search events...">
+    </div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start;" id="events-layout">
+
+      <!-- Events grid -->
+      <div>
+        <!-- Career Catalyst Series — featured card -->
+        <div style="margin-bottom:32px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+            <span style="width:4px;height:20px;background:var(--primary);border-radius:2px;display:inline-block;"></span>
+            <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">Featured Series</h2>
+          </div>
+
+          <a href="/events/career-catalyst" style="display:block;text-decoration:none;">
+            <div class="series-card" style="border:2px solid var(--primary);background:linear-gradient(135deg,#0F1628,#1a2a4a);">
+              <div class="series-card-banner" style="background:linear-gradient(135deg,#0F1628,#00629B);padding:28px 32px;height:auto;justify-content:flex-start;gap:24px;flex-wrap:wrap;">
+                <img src="/assets/images/speaker-formal.png" alt="Engr. Ghazanfar" style="height:80px;width:80px;border-radius:50%;object-fit:cover;object-position:top center;border:3px solid rgba(255,255,255,.2);flex-shrink:0;">
+                <div>
+                  <div style="font-size:0.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Monthly Webinar Series</div>
+                  <div style="font-size:1.3rem;font-weight:900;color:#fff;line-height:1.15;margin-bottom:4px;">Career Catalyst</div>
+                  <div style="font-size:0.82rem;color:rgba(255,255,255,.6);">by Engr. M. Ghazanfar Rehman &middot; 6 Episodes</div>
+                </div>
+              </div>
+              <div class="series-card-body" style="background:#fff;">
+                <div class="series-card-tags">
+                  <span class="tag tag-blue">Webinar Series</span>
+                  <span class="tag tag-yellow">Aug 2026 – Jan 2027</span>
+                  <span class="tag tag-green">Point-Based</span>
+                </div>
+                <div class="series-card-title">Monthly Point-Based Skill Development &amp; Career Webinar Series</div>
+                <p class="series-card-desc">A recurring monthly series covering 6 core professional skills — Business Communication, Critical Thinking, Teamwork, Professional Networking, Ethics, and Decision Making. Attendees accumulate points for priority access to physical events.</p>
+                <div class="series-card-meta">
+                  <span class="series-card-date">Starting 16 August 2026 &middot; 4:00–5:00 PM PKT</span>
+                  <span class="btn btn-primary btn-sm">View Series</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Other events -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <span style="width:4px;height:20px;background:var(--accent-dark);border-radius:2px;display:inline-block;"></span>
+          <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">All Events</h2>
+        </div>
+        <div id="events-grid-container" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;"></div>
+      </div>
+
+      <!-- Sidebar -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div style="background:var(--bg-dark);border-radius:var(--r-xl);padding:24px;">
+          <div style="width:40px;height:40px;background:rgba(123,198,126,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </div>
+          <h3 style="color:#fff;font-size:1rem;font-weight:700;margin-bottom:8px;">Propose an Event</h3>
+          <p style="color:rgba(255,255,255,.5);font-size:0.82rem;line-height:1.6;margin-bottom:16px;">Organizations and student chapters can request IEEE YP Karachi backing for events and workshops.</p>
+          <button id="propose-btn" class="btn btn-accent" style="width:100%;cursor:pointer;">Propose Activity</button>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;border-top:3px solid var(--accent-dark);">
+          <h3 style="font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:12px;">Why Attend YP Events?</h3>
+          <ul style="display:flex;flex-direction:column;gap:9px;">
+            <li style="display:flex;gap:9px;font-size:0.82rem;color:var(--text-muted);align-items:flex-start;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:3px;"><polyline points="20 6 9 17 4 12"/></svg>Earn points for priority event access</li>
+            <li style="display:flex;gap:9px;font-size:0.82rem;color:var(--text-muted);align-items:flex-start;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:3px;"><polyline points="20 6 9 17 4 12"/></svg>Grow your professional network</li>
+            <li style="display:flex;gap:9px;font-size:0.82rem;color:var(--text-muted);align-items:flex-start;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:3px;"><polyline points="20 6 9 17 4 12"/></svg>IEEE attendance certificates</li>
+            <li style="display:flex;gap:9px;font-size:0.82rem;color:var(--text-muted);align-items:flex-start;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:3px;"><polyline points="20 6 9 17 4 12"/></svg>Meet industry and academic leaders</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<footer id="site-footer" class="site-footer"></footer>
+<script src="/assets/js/main.js"></script>
+<script>
+const EVENTS=[
+  {id:1,category:'webinars',status:'upcoming',date:'2026-08-16',title:'Career Catalyst – Ep 01: Business Communication',desc:'Corporate messaging, professional emails, workplace communication, and client-facing pitches.',location:'Online — Zoom',type:'Webinar',link:'/events/career-catalyst/business-communication'},
+  {id:2,category:'webinars',status:'upcoming',date:'2026-09-13',title:'Career Catalyst – Ep 02: Critical Thinking',desc:'Analytical problem solving, objective evaluation, and eliminating cognitive biases in the workplace.',location:'Online — Zoom',type:'Webinar',link:'/events/career-catalyst/critical-thinking'},
+  {id:3,category:'webinars',status:'upcoming',date:'2026-10-18',title:'Career Catalyst – Ep 03: Teamwork',desc:'Group dynamics, conflict resolution, collaborative leadership, and organizational development.',location:'Online — Zoom',type:'Webinar',link:'/events/career-catalyst/teamwork'},
+  {id:4,category:'networking',status:'upcoming',date:'2026-08-05',title:'YP Meet &amp; Greet — Karachi',desc:'Connect with fellow young engineers and professionals across Karachi in a structured networking session.',location:'SZABIST, Karachi',type:'Networking'},
+  {id:5,category:'workshops',status:'upcoming',date:'2026-07-15',title:'Robotics Boot Camp 2026',desc:'A hands-on 2-day intensive on robot design, microcontrollers, and embedded programming.',location:'NED University, Karachi',type:'Workshop'},
+  {id:6,category:'visits',status:'past',date:'2026-01-28',title:'Industry Visit — K-Electric',desc:'Technical briefing at K-Electric facilities focused on smart-grid technology and power distribution.',location:'K-Electric HQ, Karachi',type:'Industry Visit'},
+];
+function fmtDate(s){return new Date(s).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'});}
+let cur='all';
+function render(){
+  const q=(document.getElementById('event-search').value||'').toLowerCase();
+  const list=EVENTS.filter(e=>(cur==='all'||e.category===cur)&&(!q||(e.title+e.desc+e.location).toLowerCase().includes(q)));
+  const c=document.getElementById('events-grid-container');
+  if(!list.length){c.innerHTML='<p style="color:var(--text-muted);padding:32px 0;">No events found.</p>';return;}
+  c.innerHTML=list.map(e=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;transition:all .22s;" onmouseenter="this.style.boxShadow='var(--shadow-md)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.boxShadow='';this.style.transform=''">
+      <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="tag ${e.status==='upcoming'?'tag-yellow':'tag-gray'}">${e.type}</span>
+        <span class="tag ${e.status==='upcoming'?'tag-blue':'tag-gray'}">${e.status==='upcoming'?'Upcoming':'Concluded'}</span>
+      </div>
+      <div style="padding:16px 18px 18px;flex-grow:1;display:flex;flex-direction:column;">
+        <div style="font-size:0.98rem;font-weight:700;color:var(--text);margin-bottom:7px;line-height:1.35;">${e.title}</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;flex-grow:1;margin-bottom:12px;">${e.desc}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;">${fmtDate(e.date)}</div>
+            <div style="font-size:0.72rem;color:var(--text-light);">${e.location}</div>
+          </div>
+          ${e.link?`<a href="${e.link}" class="btn btn-outline btn-sm">View</a>`:'<span class="tag tag-gray">Details TBA</span>'}
+        </div>
+      </div>
+    </div>`).join('');
+}
+document.querySelectorAll('.filter-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); cur=btn.dataset.filter; render();
+  });
+});
+document.getElementById('event-search').addEventListener('input',render);
+// Modal
+function openModal(){document.getElementById('propose-modal').classList.add('active');document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('propose-modal').classList.remove('active');document.body.style.overflow='';document.getElementById('propose-form').reset();document.getElementById('form-status').className='form-status';}
+document.getElementById('propose-btn').addEventListener('click',openModal);
+document.getElementById('modal-close-btn').addEventListener('click',closeModal);
+document.getElementById('propose-modal').addEventListener('click',e=>{if(e.target===document.getElementById('propose-modal'))closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.getElementById('propose-form').addEventListener('submit',async function(e){
+  e.preventDefault();
+  const btn=document.getElementById('submit-btn'),status=document.getElementById('form-status');
+  const payload=Object.fromEntries(new FormData(this).entries());
+  if(!payload.name||!payload.email||!payload.eventType||!payload.title||!payload.description){status.className='form-status error';status.textContent='Please fill in all required fields.';return;}
+  btn.disabled=true;btn.textContent='Submitting...';
+  try{
+    const res=await fetch('/api/propose-activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,submittedAt:new Date().toISOString()})});
+    if(res.ok){status.className='form-status success';status.textContent='Proposal submitted! We will contact you within 3-5 business days.';this.reset();}
+    else throw new Error();
+  }catch{
+    const p=JSON.parse(localStorage.getItem('yp_proposals')||'[]');
+    p.push({...payload,id:Date.now().toString(),status:'pending',submittedAt:new Date().toISOString()});
+    localStorage.setItem('yp_proposals',JSON.stringify(p));
+    status.className='form-status success';status.textContent='Proposal received. We will contact you at '+payload.email+' within 3-5 business days.';this.reset();
+  }
+  btn.disabled=false;btn.textContent='Submit Proposal';
+});
+// Layout
+function handleLayout(){const l=document.getElementById('events-layout');if(l)l.style.gridTemplateColumns=window.innerWidth<=768?'1fr':'1fr 300px';}
+handleLayout();window.addEventListener('resize',handleLayout);
+render();
+</script>
+</body>
+</html>
